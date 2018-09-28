@@ -1,0 +1,104 @@
+resources:
+- repo: self
+phases:
+- phase: Phase_1
+  displayName: Build Core and Run Unit Tests
+
+  condition: succeeded()
+  queue:
+    name: Hosted VS2017
+    demands: 
+   - msbuild
+   - vstest
+
+  steps:
+  - task: NuGetToolInstaller@0
+    displayName: 'Use NuGet 4.3.0'
+
+
+  - task: NuGetCommand@2
+    displayName: 'NuGet restore'
+
+
+  - task: MSBuild@1
+    displayName: 'Build project **/Core.csproj'
+    inputs:
+      solution: ' **/Core.csproj'
+
+
+  - task: MSBuild@1
+    displayName: 'Build project **/Core.Tests.csproj'
+    inputs:
+      solution: ' **/Core.Tests.csproj'
+
+
+  - task: VSTest@2
+    displayName: 'VsTest - testAssemblies'
+
+
+
+- phase: Phase_2
+  displayName: Build Core / Android & Run UI Tests
+
+  condition: succeeded()
+  queue:
+    name: Hosted VS2017
+    demands: 
+   - msbuild
+   - MSBuild
+   - Xamarin.Android
+
+  steps:
+  - task: NuGetToolInstaller@0
+    displayName: 'Use NuGet 4.3.0'
+
+
+  - task: NuGetCommand@2
+    displayName: 'NuGet restore'
+
+
+  - task: NuGetCommand@2
+    displayName: 'NuGet custom'
+    inputs:
+      command: custom
+
+      arguments: 'install Xamarin.UITest -Version 2.2.4 -OutputDirectory "$(System.DefaultWorkingDirectory)\mototrax-mobile-app-CI\drop\packages"'
+
+
+  - task: MSBuild@1
+    displayName: 'Build project **/Core.csproj'
+    inputs:
+      solution: ' **/Core.csproj'
+
+
+  - task: XamarinAndroid@1
+    displayName: 'Build Xamarin.Android project **/PipelineUITest.Android.csproj'
+    inputs:
+      projectFile: '**/PipelineUITest.Android.csproj'
+
+
+  - task: MSBuild@1
+    displayName: 'Build project  **/UITests.csproj'
+    inputs:
+      solution: ' **/UITests.csproj'
+
+
+  - task: AppCenterTest@1
+    displayName: 'Test with Visual Studio App Center'
+    inputs:
+      appFile: PipelineUITest/PipelineUITest.Android/bin/Debug/com.companyname.PipelineUITest.apk
+
+      frameworkOption: uitest
+
+      uiTestBuildDirectory: '$(build.sourcesdirectory)/UITests'
+
+      uiTestToolsDirectory: '$(System.DefaultWorkingDirectory)\mototrax-mobile-app-CI\drop\packages'
+
+      serverEndpoint: AppCenter
+
+      appSlug: 'AngelTrax/MotoTrax-Android'
+
+      devices: 'Google Pixel 2'
+
+
+
