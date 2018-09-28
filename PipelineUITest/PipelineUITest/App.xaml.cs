@@ -1,4 +1,7 @@
-﻿using System;
+﻿using Microsoft.AppCenter;
+using Microsoft.AppCenter.Analytics;
+using Microsoft.AppCenter.Crashes;
+using System;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 
@@ -16,7 +19,9 @@ namespace PipelineUITest
 
         protected override void OnStart()
         {
-            // Handle when your app starts
+            AppCenter.Start("android=d6ea4623-7381-4b97-afde-dcf4a1aeabbf;" +
+                   "ios=9d5c4518-86fb-41a3-995a-caa1d2024608",
+                   typeof(Analytics), typeof(Crashes));
         }
 
         protected override void OnSleep()
