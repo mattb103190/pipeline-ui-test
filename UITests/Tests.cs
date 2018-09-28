@@ -2,7 +2,6 @@
 using System.IO;
 using System.Linq;
 using NUnit.Framework;
-using ObjCRuntime;
 using Xamarin.UITest;
 using Xamarin.UITest.Queries;
 using Platform = Xamarin.UITest.Platform;
